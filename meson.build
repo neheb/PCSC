@@ -93,18 +93,19 @@ incdir = include_directories(['src', 'src/PCSC'])
 # dependencies
 threads_dep = dependency('threads')
 pcscd_dep = [threads_dep]
-if get_option('libudev')
-  udev_dep = dependency('libudev')
+udev_dep = dependency('libudev', required: get_option('libudev'))
+if udev_dep.found()
   pcscd_dep += udev_dep
   conf_data.set('HAVE_LIBUDEV', true)
   features += 'libudev'
 endif
 
-if get_option('libusb')
-  if get_option('libudev')
-    error('You can\'t use both libudev and libusb')
-  endif
-  libusb_dep = dependency('libusb-1.0')
+if udev_dep.found() and get_option('libusb').enabled()
+  error('You can\'t use both libudev and libusb')
+endif
+
+libusb_dep = dependency('libusb-1.0', required: get_option('libusb'))
+if libusb_dep.found() and not udev_dep.found()
   pcscd_dep += libusb_dep
   conf_data.set('HAVE_LIBUSB', true)
   features += 'libusb'
@@ -231,7 +232,7 @@ install_headers(
   install_dir : 'include/PCSC')
 
 # data
-if get_option('polkit')
+if polkit_dep.found()
 install_data('doc/org.debian.pcsc-lite.policy',
   install_dir : polkit_dep.get_variable('policydir'))
 endif
@@ -248,8 +249,8 @@ configure_file(output : 'pcsclite.h',
 configure_file(output : 'pcscd.h',
   input : 'src/pcscd.h.in',
   configuration : confgen_data)
-if get_option('libsystemd')
-  systemd = dependency('systemd')
+systemd = dependency('systemd', required: get_option('libsystemd'))
+if systemd.found()
   unit = get_option('systemdunit')
   systemdsystemunitdir = systemd.get_variable(pkgconfig : 'systemd' + unit + 'unitdir')
 configure_file(output : 'pcscd.socket',

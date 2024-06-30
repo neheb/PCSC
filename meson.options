@@ -1,18 +1,17 @@
 option('libsystemd',
-  type : 'boolean',
+  type : 'feature',
   description : 'Use systemd for daemon auto start')
 
 option('libudev',
-  type : 'boolean',
+  type : 'feature',
   description : 'Use libudev (preferred) for USB hotplug')
 
 option('libusb',
-  type : 'boolean',
-  value : false,
+  type : 'feature',
   description : 'Use libusb for USB hotplug')
 
 option('polkit',
-  type : 'boolean',
+  type : 'feature',
   description : 'Use polkit to enforce access control')
 
 option('usb',
